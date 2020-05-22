@@ -11,9 +11,15 @@ int physMemory[CAPACITY];
 
 int main(){
 
+    //обнуление памяти
+    for (int i = 0; i < CAPACITY; i++)
+        physMemory[i] = 0;
+
     while(1){
         string str; // строка для ввода команды
-        //vector <string> attributes; // массив слов, которые разбились из строки выше
+        cout << endl;
+        //вывод path
+        cout << " > ";
         cin >> str;
         //разбиваем строку
         istringstream iss(entered); string choose;
@@ -21,10 +27,33 @@ int main(){
         iss >> choose;
         switch (choose)
         {
-        case "":
+        case "read":
             /* code */
             break;
+
+        case "view":
+            //code
+            break;
+
+        case "modify":
+            break;
+
+        case "delete":
+
+            break;
         
+        case "info":
+            cout << "something output info of files";
+            break;
+
+        case "cls":
+            system("cls");
+            break;
+
+        case "help":
+            cout << "\nThat's command you can use in this programm:\n";
+            cout << "\tread 'name file' - read a file from the current directory"
+
         case "exit":
             cout << "Exit from the programm, press any symbol...\n";
             getch();
