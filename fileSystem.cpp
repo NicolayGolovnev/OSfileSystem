@@ -52,7 +52,15 @@ int main(){
 
         case "help":
             cout << "\nThat's command you can use in this programm:\n";
-            cout << "\tread 'name file' - read a file from the current directory"
+            cout << "\tread 'name file' - read a file from the current directory\n";
+            cout << "\tview 'name file' - \n";
+            cout << "\tmodify 'name file' - \n";
+            cout << "\tdelete 'name catalog or file' - \n";
+            cout << "\tinfo - show how much files created\n";
+            cout << "\tcls - clear a screen\n";
+            cout << "\thelp - show this page\n";
+            cout << "\texit - ext from programm\n";
+            break;
 
         case "exit":
             cout << "Exit from the programm, press any symbol...\n";
