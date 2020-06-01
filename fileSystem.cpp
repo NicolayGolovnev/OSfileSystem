@@ -309,8 +309,8 @@ int main(){
             for (int i = 0; i < currentFolder.size(); i++)
                 capacitySize += currentFolder[i]->getSize();
             cout << endl << capacitySize << " blocks\t< >\t.." << endl;
-            //вывод всех файлов текущего каталога
-            for (int i = 0; i < currentFolder.size(); i++)
+            //вывод всех файлов текущего каталога, кроме секретного
+            for (int i = 1; i < currentFolder.size(); i++)
                 currentFolder[i]->outFileForDir();
 
         }
@@ -329,9 +329,6 @@ int main(){
         }
         else if (choose == "exit"){
             cout << "Exit from the programm, press any symbol...\n";
-            /* //удаление всех файлов, которые были созданы этой программой
-            for (int i = 0; i < tableFiles.size(); i++)
-                remove(tableFiles[i].getName().c_str()); */
             getch();
             return 0;
         }
