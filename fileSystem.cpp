@@ -50,16 +50,18 @@ class File{
         return this->name;
     }
 
-    void setInMemory(){
+    int setInMemory(){
         pair<int, int> flag = this->goInMemory();
         //если можем запихать файл в память, делаем это
         if (flag.first){
             this->adressFirstBlock = flag.second;
             for (int i = flag.second; i < this->size + flag.second; i++)
                 physMemory[i] = 1;
+            return 1;
         }
         else{
             cout << "Could not create a file, because we do not have a space for this!\n";
+            return 0;
         }
     }
 
@@ -134,13 +136,16 @@ int main(){
             int attribute; cin >> attribute;
             
             File a(nameFile, size, attribute);
-            //добавить в список всех файлов
-            tableFiles.push_back(a);
+            if(a.setInMemory()){ //есть место в памяти, записываем в процессы    
+                //добавить в список всех файлов
+                tableFiles.push_back(a);
+                
+                //добавить возврат в предыдущий каталог
+                a.setLevelDown(forSave);
+                //добавить в папку, котором мы находимся прямо сейчас
+                currentFolder.push_back(a);
+            }
             
-            //добавить возврат в предыдущий каталог
-            a.setLevelDown(forSave);
-            //добавить в папку, котором мы находимся прямо сейчас
-            currentFolder.push_back(a);
 
         }
         else if (choose == "read"){
