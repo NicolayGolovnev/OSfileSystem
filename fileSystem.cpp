@@ -2,6 +2,8 @@
 #include <conio.h>
 #include <string>
 #include <fstream>
+#include <sstream>
+#include <vector>
 
 #define CAPACITY 10000
 
@@ -29,6 +31,7 @@ class File{
 string path = "C:\\"; //строка, в которой записан текущий адрес расположения в памяти
 int physMemory[CAPACITY];
 vector<File> tableFiles;
+vector<File> currentCatalog;
 
 int main(){
 
@@ -37,75 +40,81 @@ int main(){
         physMemory[i] = 0;
 
     while(1){
-        string str; // строка для ввода команды
-        cout << endl;
+        string str = ""; // строка для ввода команды
         //вывод path
-        cout << " > ";
+        cout << path << " > ";
         cin >> str;
+        cout << endl;
         //разбиваем строку
-        istringstream iss(entered); string choose;
-        //copy(istreambuf_iterator<string>(iss), istreambuf_iterator<string>(), back_inserter<vector<string> >(tokens));
+        stringstream iss(str);
+        string choose;
         iss >> choose;
-        switch (choose)
-        {
-        case "read":
-            /* code */
-            break;
 
-        case "view":
-            //code
-            break;
+        //аналог свитча через if
+        if (choose == "create"){
+            string nameFile = "";
+            iss >> nameFile;
+        }
+        else if (choose == "read"){
 
-        case "modify":
-            string name;
-            iss >> name;
-
-            ofstream modify;
+        }
+        else if (choose == "modify"){
+            string buf;
+            bool modify;
+            modify = false;
+            iss >> buf;
             for (int i = 0; i < tableFiles.size(); i++){
-                name = tableFiles[i].getName();
-                modify.open(name);
-                if (modify)
+                string check;
+                check = tableFiles[i].getName();
+                if (check == buf){
+                    modify = true;
                     break;
+                }
             }
-            
-            break;
+            if (!modify){
+                cout << "Wrong enter a name file! I cannot open invisible file!\n";
+            }
+            else{
+                //делаем запрос системе на открытия файла в блокноте
+                string q = "notepad.exe ";
+                q += buf;
+                const char* openningANIME = q.c_str();
+                system(openningANIME);
+            }
+        }
+        else if (choose == "delete"){
 
-        case "delete":
+        }
+        else if (choose == "info"){
 
-            break;
-        
-        case "info":
-            cout << "something output info of files";
-            break;
-
-        case "cls":
+        }
+        else if (choose == "cls"){
             system("cls");
-            break;
+        }
+        else if (choose == "dir"){
 
-        case "dir":
-
-            break;
-
-        case "help":
+        }
+        else if (choose == "help"){
             cout << "\nThat's command you can use in this programm:\n";
-            cout << "\tread 'name file' - read a file from the current directory\n";
-            cout << "\tview 'name file' - \n";
-            cout << "\tmodify 'name file' - open text editor for editting file\n";
-            cout << "\tdelete 'name catalog or file' - \n";
-            cout << "\tinfo - show how much files created\n";
-            cout << "\tcls - clear a screen\n";
-            cout << "\thelp - show this page\n";
-            cout << "\tdir - view all files in current catalog\n";
-            cout << "\texit - ext from programm\n";
-            break;
-
-        case "exit":
+            cout << "\tcreate 'name file' \t\t- \n";
+            cout << "\tread 'name file' \t\t- read a file from the current directory\n";
+            cout << "\tmodify 'name file' \t\t- open text editor for editting file\n";
+            cout << "\tdelete 'name catalog or file' \t- \n";
+            cout << "\tinfo \t\t\\t- show how much files created\n";
+            cout << "\tcls \t\t\t\t- clear a screen\n";
+            cout << "\tdir \t\t\t\t- view all files in current catalog\n";
+            cout << "\thelp \t\t\t\t- show this page\n";
+            cout << "\texit \t\t\t\t- ext from programm\n";
+        }
+        else if (choose == "exit"){
             cout << "Exit from the programm, press any symbol...\n";
             getch();
             return 0;
-
-        default:
-            break;
         }
+        else{//аналог дефаулта
+            cout << "Unknown command. For the view full list of command enter 'help'\n";
+        }
+        
     }
+
 }
