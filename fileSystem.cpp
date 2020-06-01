@@ -1,13 +1,34 @@
 #include <iostream>
 #include <conio.h>
 #include <string>
+#include <fstream>
 
 #define CAPACITY 10000
 
 using namespace std;
 
-string path = ""; //строка, в которой записан текущий адрес расположения в памяти
+class File{
+    private:
+    string name;
+    int size;
+    int attribute;//только для чтения, только для записи, для обоих вида, особый файл - каталог
+    int adressFirstBlock;
+
+    public:
+    File(string Name, int Size, int Attribute){
+        this->name = Name;
+        this->size = Size;
+        this->attribute = Attribute;
+        this->adressFirstBlock = -1;
+    }
+    string getName(){
+        return this->name;
+    }
+};
+
+string path = "C:\\"; //строка, в которой записан текущий адрес расположения в памяти
 int physMemory[CAPACITY];
+vector<File> tableFiles;
 
 int main(){
 
@@ -36,6 +57,17 @@ int main(){
             break;
 
         case "modify":
+            string name;
+            iss >> name;
+
+            ofstream modify;
+            for (int i = 0; i < tableFiles.size(); i++){
+                name = tableFiles[i].getName();
+                modify.open(name);
+                if (modify)
+                    break;
+            }
+            
             break;
 
         case "delete":
@@ -50,15 +82,20 @@ int main(){
             system("cls");
             break;
 
+        case "dir":
+
+            break;
+
         case "help":
             cout << "\nThat's command you can use in this programm:\n";
             cout << "\tread 'name file' - read a file from the current directory\n";
             cout << "\tview 'name file' - \n";
-            cout << "\tmodify 'name file' - \n";
+            cout << "\tmodify 'name file' - open text editor for editting file\n";
             cout << "\tdelete 'name catalog or file' - \n";
             cout << "\tinfo - show how much files created\n";
             cout << "\tcls - clear a screen\n";
             cout << "\thelp - show this page\n";
+            cout << "\tdir - view all files in current catalog\n";
             cout << "\texit - ext from programm\n";
             break;
 
