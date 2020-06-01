@@ -101,11 +101,6 @@ vector<string> foldersOnLevel; // путь, где расписаны по ур�
 int level = 0; // уровень, на котором находимся
 
 int main(){
-
-    /* File a("1.txt", 1, 1);
-    tableFiles.push_back(a);
-    for (int i = 0; i < tableFiles.size(); i++)
-        tableFiles[i].outFileInfo(); */
     
     //говорим, что мы находимся изначально в корне
     foldersOnLevel.clear();
@@ -150,7 +145,17 @@ int main(){
         }
         else if (choose == "read"){
             //открываем файл, выводим просто все строчки в консоль, готово
-
+            string nameFile;
+            iss >> nameFile;
+            ofstream file(nameFile);
+            if (!file)
+                cout << "Could not open file!\n";
+            else{
+                string buf;
+                cout << endl;
+                while(getline(file, buf))
+                    cout << buf << endl;
+            }
         }
         else if (choose == "modify"){
             string buf;
@@ -215,7 +220,9 @@ int main(){
             
         }
         else if (choose == "info"){
-
+            //выписываем таблицу файлов
+            for (int i = 0; i < tableFiles.size(); i++)
+                tableFiles[i].outFileInfo();
         }
         else if (choose == "cls"){
             system("cls");
