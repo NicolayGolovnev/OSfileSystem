@@ -53,9 +53,6 @@ class File{
         this->adressFirstBlock = -1;
         this->timeinfo = time;
     }
-    string getName(){
-        return this->name;
-    }
 
     int setInMemory(){
         pair<int, int> flag = this->goInMemory();
@@ -70,6 +67,19 @@ class File{
             cout << "Could not create a file, because we do not have a space for this!\n";
             return 0;
         }
+    }
+    void setSize(int s){
+        this->size = s;
+    }
+
+    string getName(){
+        return this->name;
+    }
+    int getSize(){
+        return this->size;
+    }
+    int getAttribute(){
+        return this->attribute;
     }
 
     void outFileInfo(){
@@ -87,6 +97,9 @@ class File{
             case -1:
                 cout << "secret):\t\t";
                 break;
+            default:
+                cout << this->attribute << "):\t\t\t";
+                break;
         }
         cout << this->name << " \t";
         if (this->name.size() < 7) cout << "\t";
@@ -98,7 +111,6 @@ class File{
         printf("%02d:%02d:%02d\n", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         
     }
-
     void outFileForDir(){
         tm* timeinfo = localtime(&(this->timeinfo));
         cout << timeinfo->tm_mday << "/" << timeinfo->tm_mon + 1 << "/";
@@ -118,20 +130,17 @@ class File{
             case -1:
                 cout << "S>";
                 break;
+            default:
+                cout << "U>";
+                break;
         }
         cout << "\t" << this->name << endl;
     }
-
-    int getSize(){
-        return this->size;
+    void deleteFile(){
+        int size = this->size + this->adressFirstBlock;
+        for (int i = this->adressFirstBlock; i < size; i++)
+            physMemory[i] = 0;
     }
-    void setSize(int s){
-        this->size = s;
-    }
-    int getAttribute(){
-        return this->attribute;
-    }
-
 };
 
 vector<File*> tableFiles;
@@ -192,7 +201,38 @@ void startProgram(){
     foldersOnLevel.clear();
     currentFolder = mainFolder;
 }
-
+void deleteFile(int i){
+    //удаляем файл из текущего каталога
+    File *q = currentFolder[i];
+    string nameFile = q->getName();
+    for (int j = i; j < currentFolder.size() - 1; j++)
+        currentFolder[j] = currentFolder[j + 1];
+    currentFolder.pop_back();
+    //удаляем сам файл
+    q->deleteFile();
+    //удаляем файл из таблицы файлов
+    for (int j = 0; j < tableFiles.size(); j++)
+        if (tableFiles[j]->getName() == nameFile){
+            for (int q = j; q < tableFiles.size() - 1; q++)
+                tableFiles[q] = tableFiles[q + 1];
+            tableFiles.pop_back();
+            break;
+        }
+}
+void deleteFolder(vector<File*> folder){
+    for (int i = 0; i < folder.size(); i++){
+        //если это есть каталог, то идем рекурсивно туда и удаляем оттуда все файлы
+        if (folder[i]->getAttribute() == 3)
+            deleteFolder(folder[i]->folderNext);
+        //удаляем сам файл
+        vector<File*> save = currentFolder;
+        currentFolder = folder;
+        deleteFile(i);
+        currentFolder = save;
+        if (folder[i]->getAttribute() != 3)
+            remove(folder[i]->getName().c_str());
+    }
+}
 int main(){
     
     startProgram();
@@ -310,11 +350,39 @@ int main(){
         else if (choose == "delete"){
             string nameFile;
             iss >> nameFile;
-            for (int i = 1; i < currentFolder.size(); i++){
+            bool deleted = false;
+            for (int i = 1; i < currentFolder.size(); i++)
                 if (currentFolder[i]->getName() == nameFile){
-
+                    deleted = true;
+                    if (currentFolder[i]->getAttribute() != 3){
+                        deleteFile(i);
+                        remove(nameFile.c_str());
+                        //cout << "DESTROY " << currentFolder[i]->getName() << "file!\n";
+                    }
+                    else{
+                        //каталог, проверяем есть ли там файлы
+                        cout << currentFolder[i]->folderNext.size() << endl;
+                        if (currentFolder[i]->folderNext.size() <= 1){
+                            //каталог пустой (имеет только секретный файл для работы программы), можем удалить данный файл-каталог
+                            deleteFile(i);
+                            //cout << "DESTROY " << currentFolder[i]->getName() << "file!\n";
+                        }
+                        else{
+                            cout << "This folder have some files, do you want to destroy them all with folder (y for accepted)? ";
+                            char key; cin >> key;
+                            if (key == 'y'){
+                                //удаляем все, что есть в каталоге
+                                deleteFolder(currentFolder[i]->folderNext);
+                                //все файлы удалили, удаляем сам каталог
+                                deleteFile(i);
+                                //cout << "DESTROY " << currentFolder[i]->getName() << "file!\n";
+                            }
+                        }
+                    }
+                    break;
                 }
-            }
+            if (!deleted)
+                cout << "File does not exist!\n";
         }
         else if (choose == "cd"){
             string cd;
@@ -449,6 +517,7 @@ int main(){
         else if (choose == "exit"){
             //cout << "Exit from the programm, press any symbol...\n";
             //getch();
+
             //сохраняем все файлы, которые у нас остались при работе
             //при этом после запуска, у нас будут имется данные об этих файлах, поэтому их не надо будет заного создавать и терять данные
             //перезаписыванием исходных данных

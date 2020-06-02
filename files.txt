@@ -1,5 +1,4 @@
-4
-folder 0 3
+3
 file.txt 55 2
-folder2 0 3
-file 0 3
+999.exe 12 2
+file.tt 1 1
