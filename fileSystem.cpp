@@ -1,10 +1,10 @@
 #include <iostream>
-#include <conio.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <ctime>
+#include <windows.h>
 
 #define CAPACITY 10000
 
@@ -140,6 +140,11 @@ int level = 0; // уровень, на котором находимся
 int indexForSaveList; // индекс для сохранения каталога, когда спускаемся вниз
 
 void startProgram(){
+    //графическое приветствие
+    cout << "Compilition date: " << __DATE__ << " " << __TIME__ << "\n\n";
+    cout << "Laboratory Work 9. File System OS\n";
+    cout << "Created by Nikolay Golovnev, student of software ingineering ASTU\n\n";
+
     //записываем обязательный файл в каталог, чтобы можно было возвращаться(такой файл находится на каждом уровне в 0 позиции)
     time_t seconds = time(NULL);
 
@@ -147,17 +152,43 @@ void startProgram(){
     mainFolder.push_back(a);
     //если хотим спустится ниже, то спустимся сюда же
     mainFolder[0]->folderDown = mainFolder;
-    //говорим, что мы находимся изначально в корне
-    foldersOnLevel.clear();
-    currentFolder = mainFolder;
     //обнуление памяти
     for (int i = 0; i < CAPACITY; i++)
         physMemory[i] = 0;
 
-    //графическое приветствие
-    cout << "Compilition date: " << __DATE__ << " " << __TIME__ << "\n\n";
-    cout << "Laboratory Work 9. File System OS\n";
-    cout << "Created by Nikolay Golovnev, student of software ingineering ASTU\n\n";
+    //открываем файл, считываем наши данные в таблицу файлов
+    ifstream in("files.txt");
+    if (in){
+        int n; in >> n;
+        for (int i = 0; i < n; i++){
+            string name;
+            int size, attribute;
+            in >> name >> size >> attribute;
+            time_t seconds = time(NULL);
+            File* a = new File(name, size, attribute, seconds);
+            if (a->setInMemory()){
+                //добавить в список всех файлов
+                tableFiles.push_back(a);
+                //если папка, обнуляем размер
+                if (attribute == 3)
+                    a->setSize(0);
+                //добавить в корень
+                mainFolder.push_back(a);
+                //если это каталог, то нужно сделать в нем секретный файл, через который будем возвращаться
+                if (attribute == 3){
+                    time_t seconds = time(NULL);
+                    File* q = new File(name + "\\", 0, -1, seconds);
+                    q->folderDown = mainFolder;
+                    a->folderNext.push_back(q);
+                }
+            }
+        }
+    }
+    in.close();
+
+    //говорим, что мы находимся изначально в корне
+    foldersOnLevel.clear();
+    currentFolder = mainFolder;
 }
 
 int main(){
@@ -184,6 +215,11 @@ int main(){
                 cout << "Enter a name of file: ";
                 cin >> nameFile;
             }
+            else if (nameFile == "files.txt")
+                do{
+                    cout << "This name you can not use, its SYSTEM_CATALOG! Enter another name!";
+                    cin >> nameFile;
+                }while(nameFile == "files.txt");
             cout << "Enter a size of file: ";
             int size; cin >> size;
             cout << "Enter an attribute of file (1 - only read, 2 - write and read, 3 - catalog file): ";
@@ -337,7 +373,38 @@ int main(){
             for (int i = 0; i < tableFiles.size(); i++)
                 tableFiles[i]->outFileInfo();
 
-            //выписываем занятую память
+            //выписываем занятую память (взято из 8 лабораторной)
+            //для работы с цветом в консоли
+            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+            
+            SetConsoleTextAttribute(hConsole, (WORD) ((0 << 4) | 15));
+            cout << "\n\nCAPACITY OF PHYS MEMORY - " << CAPACITY << " blocks";
+            // отрисовка оперативной памяти
+            cout << "\n ";
+            for (int i = 0; i < 100; i++)
+                cout << "-";
+            cout << " \n|";
+            char flag = 0;
+            for (int i = 0; i < 100; i++){
+                flag = 0;
+                for (int j = 0; j < CAPACITY / 100; j++)
+                    if (physMemory[CAPACITY / 100 * i + j] == 1){
+                        SetConsoleTextAttribute(hConsole, (WORD) ((14 << 4) | 8));
+                        cout << " "; 
+                        flag = 1;
+                        break;
+                    }
+                if (!flag){
+                    SetConsoleTextAttribute(hConsole, (WORD) ((8 << 4) | 14));
+                    cout << " "; 
+                }
+            }
+            SetConsoleTextAttribute(hConsole, (WORD) ((0 << 4) | 15));
+            cout << "|\n";
+            cout << " ";
+            for (int i = 0; i < 100; i++)
+                cout << "-";
+            cout << " \n";
         }
         else if (choose == "cls"){
             system("cls");
@@ -378,8 +445,18 @@ int main(){
             cout << "\texit \t\t\t\t- exit from programm\n";
         }
         else if (choose == "exit"){
-            cout << "Exit from the programm, press any symbol...\n";
+            //cout << "Exit from the programm, press any symbol...\n";
             //getch();
+            //сохраняем все файлы, которые у нас остались при работе
+            //при этом после запуска, у нас будут имется данные об этих файлах, поэтому их не надо будет заного создавать и терять данные
+            //перезаписыванием исходных данных
+            ofstream fout("files.txt");
+            fout << tableFiles.size() << endl;
+            for (int i = 0; i < tableFiles.size(); i++){
+                //string name = 
+                fout << tableFiles[i]->getName() << " " << tableFiles[i]->getSize() << " " << tableFiles[i]->getAttribute() << endl;
+            }
+            fout.close();
             return 0;
         }
         else{//аналог дефаулта

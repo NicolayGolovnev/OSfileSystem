@@ -1,0 +1,4 @@
+3
+folder 0 3
+file.txt 55 2
+folder2 0 3
