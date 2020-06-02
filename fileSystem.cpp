@@ -200,7 +200,9 @@ int main(){
                 }
                 //если создали каталог, то нужно сделать в нем секретный файл, через который будем возвращаться
                 else{
-                    File* q = new File(nameFile + "\\", 0, -1);
+                    time_t seconds = time(NULL);
+                    tm* timeinfo = localtime(&seconds);
+                    File* q = new File(nameFile + "\\", 0, -1, timeinfo);
                     q->folderDown = currentFolder;
                     a->folderNext.push_back(q);
                 }
