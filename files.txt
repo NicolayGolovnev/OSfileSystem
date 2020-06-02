@@ -1,4 +1,5 @@
-3
+4
 file.txt 55 2
 999.exe 12 2
-file.tt 1 1
+test.txt 120 2
+folder 0 3

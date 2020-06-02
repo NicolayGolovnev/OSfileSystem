@@ -307,22 +307,22 @@ int main(){
         }
         else if (choose == "modify"){
             string buf;
+            iss >> buf; 
             bool modify;
             modify = false;
-            iss >> buf; 
             int index = -1;
             for (int i = 0; i < tableFiles.size(); i++){
                 string check;
                 check = tableFiles[i]->getName();
                 
-                if (check == buf){
+                if (check == buf && tableFiles[i]->getAttribute() == 2){
                     modify = true;
                     index = i;
                     break;
                 }
             }
             if (!modify){
-                cout << "Wrong enter a name file! I cannot open invisible file!\n";
+                cout << "Wrong enter a name file or wrong attribute of file!\n";
             }
             else{
                 //делаем запрос системе на открытия файла в блокноте
@@ -358,7 +358,7 @@ int main(){
                     }
                     else{
                         //каталог, проверяем есть ли там файлы
-                        cout << currentFolder[i]->folderNext.size() << endl;
+                        //cout << currentFolder[i]->folderNext.size() << endl;
                         if (currentFolder[i]->folderNext.size() <= 1){
                             //каталог пустой (имеет только секретный файл для работы программы), можем удалить данный файл-каталог
                             deleteFile(i);
