@@ -24,6 +24,9 @@ class File{
     //pair<булева переменная для определения размещения в памяти, адрес первого блока>
     pair<int, int> goInMemory(){
         int begin;
+        //если папка, то она не имеет веса
+        if (this->attribute == 3)
+            return {1, 0};
         for (int i = 0; i < CAPACITY; i++){
             int noSpace = 0;
             for (int j = i; j < i + this->size; j++)
@@ -73,22 +76,22 @@ class File{
         cout << "File (Attribute: "; 
         switch(this->attribute){
             case 1:
-                cout << "only read)\t\t";
+                cout << "only read):\t\t";
                 break;
             case 2:
-                cout << "write and read)\t";
+                cout << "write and read):\t";
                 break;
             case 3:
-                cout << "catalog)\t\t";
+                cout << "catalog):\t\t";
                 break;
             case -1:
-                cout << "secret)\t\t";
+                cout << "secret):\t\t";
                 break;
         }
-        cout << ": " << this->name << "\tSize: " << this->size; 
-        cout << "\tAddress the first block: " << this->adressFirstBlock;
+        cout << this->name << " \tSize: " << this->size; 
+        cout << " \tAddress the first block: " << this->adressFirstBlock;
         tm* timeinfo = localtime(&(this->timeinfo));
-        cout << "\tTime create: " << timeinfo->tm_mday << "/" << timeinfo->tm_mon + 1 << "/";
+        cout << " \tTime create: " << timeinfo->tm_mday << "/" << timeinfo->tm_mon + 1 << "/";
         cout << timeinfo->tm_year + 1900 << "\t";
         printf("%02d:%02d:%02d\n", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         
@@ -150,6 +153,11 @@ void startProgram(){
     //обнуление памяти
     for (int i = 0; i < CAPACITY; i++)
         physMemory[i] = 0;
+
+    //графическое приветствие
+    cout << "Compilition date: " << __DATE__ << " " << __TIME__ << "\n\n";
+    cout << "Laboratory Work 9. File System OS\n";
+    cout << "Created by Nikolay Golovnev, student of software ingineering ASTU\n\n";
 }
 
 int main(){
@@ -227,13 +235,14 @@ int main(){
             bool modify;
             modify = false;
             iss >> buf; 
-            
+            int index = -1;
             for (int i = 0; i < tableFiles.size(); i++){
                 string check;
                 check = tableFiles[i]->getName();
-                cout << "Checker: " << check << endl;
+                
                 if (check == buf){
                     modify = true;
+                    index = i;
                     break;
                 }
             }
@@ -246,6 +255,18 @@ int main(){
                 q += buf;
                 const char* openningANIME = q.c_str();
                 system(openningANIME);
+
+                int newSize = tableFiles[index]->getSize(), inputLag;
+                cout << "Input a new size of file: if you dont want to change, enter a -1: ";
+                cin >> inputLag;
+                if (inputLag > 0)
+                    newSize = inputLag;
+
+                tableFiles[index]->setSize(newSize);
+                for (int i = 0; i < currentFolder.size(); i++)
+                    if (currentFolder[i]->getName() == tableFiles[index]->getName())
+                        currentFolder[i]->setSize(newSize);
+
             }
         }
         else if (choose == "delete"){
@@ -327,7 +348,7 @@ int main(){
             cout << endl << timeinfo->tm_mday << "/" << timeinfo->tm_mon + 1 << "/" << timeinfo->tm_year + 1900 << "\t";
             printf("%02d:%02d:%02d\t", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
             int capacitySize = 0;
-            for (int i = 1; i < tableFiles.size(); i++)
+            for (int i = 0; i < tableFiles.size(); i++)
                 capacitySize += tableFiles[i]->getSize();
             cout << capacitySize << " blocks\t< >\t." << endl;
 
@@ -335,7 +356,7 @@ int main(){
             cout << timeinfo->tm_mday << "/" << timeinfo->tm_mon + 1 << "/" << timeinfo->tm_year + 1900 << "\t";
             printf("%02d:%02d:%02d\t", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
             capacitySize = 0;
-            for (int i = 0; i < currentFolder.size(); i++)
+            for (int i = 1; i < currentFolder.size(); i++)
                 capacitySize += currentFolder[i]->getSize();
             cout << capacitySize << " blocks\t< >\t.." << endl;
             //вывод всех файлов текущего каталога, кроме секретного
@@ -348,17 +369,17 @@ int main(){
             cout << "\tcreate 'name file' \t\t- create a file with parameters\n";
             cout << "\tread 'name file' \t\t- read a file from the current directory\n";
             cout << "\tmodify 'name file' \t\t- open text editor for editting file\n";
-            cout << "\tdelete 'name catalog or file' \t- \n";
-            cout << "\tcd 'catalog' \t\t\t- go up in the catalog, which you choose\n";
+            cout << "\tdelete 'name catalog or file' \t- delete file or catalog\n";
+            cout << "\tcd 'catalog' \t\t\t- go up or down in the catalog, which you choose\n";
             cout << "\tinfo \t\t\t\t- show how much files created\n";
             cout << "\tcls \t\t\t\t- clear a screen\n";
             cout << "\tdir \t\t\t\t- view all files in current catalog\n";
             cout << "\thelp \t\t\t\t- show this page\n";
-            cout << "\texit \t\t\t\t- ext from programm\n";
+            cout << "\texit \t\t\t\t- exit from programm\n";
         }
         else if (choose == "exit"){
             cout << "Exit from the programm, press any symbol...\n";
-            getch();
+            //getch();
             return 0;
         }
         else{//аналог дефаулта
