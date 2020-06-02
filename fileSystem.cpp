@@ -88,7 +88,9 @@ class File{
                 cout << "secret):\t\t";
                 break;
         }
-        cout << this->name << " \tSize: " << this->size; 
+        cout << this->name << " \t";
+        if (this->name.size() < 7) cout << "\t";
+        cout << "Size: " << this->size; 
         cout << " \tAddress the first block: " << this->adressFirstBlock;
         tm* timeinfo = localtime(&(this->timeinfo));
         cout << " \tTime create: " << timeinfo->tm_mday << "/" << timeinfo->tm_mon + 1 << "/";
@@ -215,7 +217,7 @@ int main(){
                 cout << "Enter a name of file: ";
                 cin >> nameFile;
             }
-            else if (nameFile == "files.txt")
+            if (nameFile == "files.txt")
                 do{
                     cout << "This name you can not use, its SYSTEM_CATALOG! Enter another name!";
                     cin >> nameFile;
