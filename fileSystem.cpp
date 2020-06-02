@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <ctime>
 
 #define CAPACITY 10000
 
@@ -40,12 +41,14 @@ class File{
     public:
     vector<File*> folderNext; // Папка при определенном атрибуте, где хранятся другие файлы
     vector<File*> folderDown; // папка, которую надо запомнить, чтобы вернутся назад
+    tm* timeinfo; // время создания файла
 
-    File(string Name, int Size, int Attribute){
+    File(string Name, int Size, int Attribute, tm* time){
         this->name = Name;
         this->size = Size;
         this->attribute = Attribute;
         this->adressFirstBlock = -1;
+        this->timeinfo = time;
     }
     string getName(){
         return this->name;
@@ -83,11 +86,17 @@ class File{
                 break;
         }
         cout << ": " << this->name << "\tSize: " << this->size; 
-        cout << "\tAddress the first block: " << this->adressFirstBlock << endl;
+        cout << "\tAddress the first block: " << this->adressFirstBlock;
+        cout << "Time create: " << this->timeinfo->tm_mday << "/" << this->timeinfo->tm_mon + 1 << "/";
+        cout << this->timeinfo->tm_year + 1900 << "\t";
+        printf("%02d:%02d:%02d\n", this->timeinfo->tm_hour, this->timeinfo->tm_min, this->timeinfo->tm_sec);
         
     }
 
     void outFileForDir(){
+        cout << this->timeinfo->tm_mday << "/" << this->timeinfo->tm_mon + 1 << "/";
+        cout << this->timeinfo->tm_year + 1900 << "\t";
+        printf("%02d:%02d:%02d\t", this->timeinfo->tm_hour, this->timeinfo->tm_min, this->timeinfo->tm_sec);
         cout << this->size << " blocks\t<";
         switch(this->attribute){
             case 1:
@@ -127,8 +136,13 @@ int indexForSaveList; // индекс для сохранения каталог
 
 void startProgram(){
     //записываем обязательный файл в каталог, чтобы можно было возвращаться(такой файл находится на каждом уровне в 0 позиции)
-    File* a = new File("C:\\", 0, -1);
+    time_t seconds = time(NULL);
+    tm* timeinfo = localtime(&seconds);
+
+    File* a = new File("C:\\", 0, -1, timeinfo);
     mainFolder.push_back(a);
+    //если хотим спустится ниже, то спустимся сюда же
+    mainFolder[0]->folderDown = mainFolder;
     //говорим, что мы находимся изначально в корне
     foldersOnLevel.clear();
     currentFolder = mainFolder;
@@ -165,8 +179,12 @@ int main(){
             int size; cin >> size;
             cout << "Enter an attribute of file (1 - only read, 2 - write and read, 3 - catalog file): ";
             int attribute; cin >> attribute;
+
+            //забираем текущее время
+            time_t seconds = time(NULL);
+            tm* timeinfo = localtime(&seconds);
             
-            File* a = new File(nameFile, size, attribute);
+            File* a = new File(nameFile, size, attribute, timeinfo);
             if(a->setInMemory()){ //есть место в памяти, записываем в процессы    
                 //добавить в список всех файлов
                 tableFiles.push_back(a);
@@ -300,15 +318,22 @@ int main(){
             system("cls");
         }
         else if (choose == "dir"){
-            //место - <аттрибут> - имя файла
+            //время - место - <аттрибут> - имя файла
+            
+            cout << endl << mainFolder[0]->timeinfo->tm_mday << "/" << mainFolder[0]->timeinfo->tm_mon + 1 << "/";
+            cout << mainFolder[0]->timeinfo->tm_year + 1900 << "\t";
+            printf("%02d:%02d:%02d\t", mainFolder[0]->timeinfo->tm_hour, mainFolder[0]->timeinfo->tm_min, mainFolder[0]->timeinfo->tm_sec);
             int capacitySize = 0;
             for (int i = 1; i < tableFiles.size(); i++)
                 capacitySize += tableFiles[i]->getSize();
-            cout << endl << capacitySize << " blocks\t< >\t.";
+            cout << capacitySize << " blocks\t< >\t.\n";
+            cout << endl << currentFolder[0]->timeinfo->tm_mday << "/" << currentFolder[0]->timeinfo->tm_mon + 1 << "/";
+            cout << currentFolder[0]->timeinfo->tm_year + 1900 << "\t";
+            printf("%02d:%02d:%02d\t", currentFolder[0]->timeinfo->tm_hour, currentFolder[0]->timeinfo->tm_min, currentFolder[0]->timeinfo->tm_sec);
             capacitySize = 0;
             for (int i = 0; i < currentFolder.size(); i++)
                 capacitySize += currentFolder[i]->getSize();
-            cout << endl << capacitySize << " blocks\t< >\t.." << endl;
+            cout << capacitySize << " blocks\t< >\t.." << endl;
             //вывод всех файлов текущего каталога, кроме секретного
             for (int i = 1; i < currentFolder.size(); i++)
                 currentFolder[i]->outFileForDir();
