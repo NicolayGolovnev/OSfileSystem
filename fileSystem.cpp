@@ -145,8 +145,6 @@ class File{
 
 vector<File*> tableFiles;
 vector<File*> currentFolder, mainFolder; // текущий каталог, и каталог главного тома - голова
-vector<File*> forSave = mainFolder; //нужно для связи каталогов между собой
-vector<string> foldersOnLevel; // путь, где расписаны по уровням каталоги, находимся в данный момент тут по программе
 int level = 0; // уровень, на котором находимся
 int indexForSaveList; // индекс для сохранения каталога, когда спускаемся вниз
 
@@ -198,7 +196,6 @@ void startProgram(){
     in.close();
 
     //говорим, что мы находимся изначально в корне
-    foldersOnLevel.clear();
     currentFolder = mainFolder;
 }
 void deleteFile(int i){
@@ -397,10 +394,8 @@ int main(){
                 path.erase(path.size() - sizeStr, sizeStr);
                 
                 level--;
-                foldersOnLevel.pop_back();
                 currentFolder[0]->folderDown[indexForSaveList]->folderNext = currentFolder;
                 currentFolder = currentFolder[0]->folderDown;
-                forSave = currentFolder;
             }
             else if (cd == "."){
                 //если корень - ничего не делаем
@@ -410,9 +405,6 @@ int main(){
                 currentFolder[0]->folderDown[indexForSaveList]->folderNext = currentFolder;
                 //спускаемся в самый корень
                 level = 0;
-                for (int i = 0; i < foldersOnLevel.size(); i++)
-                    foldersOnLevel.pop_back();
-                forSave = mainFolder;
                 currentFolder = mainFolder;
                 path = "C:\\";
             }
@@ -425,12 +417,10 @@ int main(){
                 for (int j = 1; j < currentFolder.size(); j++){
                     //переход в ту дерикторию, куда нам нужно создать файл
                     if (currentFolder[j]->getName() == cd && currentFolder[j]->getAttribute() == 3){
-                        forSave = currentFolder;
                         indexForSaveList = j;
+                        currentFolder[j]->folderNext[0]->folderDown = currentFolder;
                         currentFolder = currentFolder[j]->folderNext;
-                        currentFolder[0]->folderDown = forSave;
                         level++;
-                        foldersOnLevel.push_back(cd);
                         path += cd + "\\";
                         break;
                     }
